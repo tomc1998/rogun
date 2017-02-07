@@ -24,6 +24,9 @@ pub mod input;
 /// Physics system
 pub mod physics;
 
+/// Tile system
+pub mod tile;
+
 pub fn init<'a>() -> Option<LibState<'a>> {
   use glium::DisplayBuild;
   let display = glium::glutin::WindowBuilder::new()
@@ -54,6 +57,8 @@ pub fn init<'a>() -> Option<LibState<'a>> {
     engine_logger: logger::Logger::new(),
     curr_g_state: Some(state::GameState::new()),
 
+    tile_bank: tile::TileBank::new(),
+
     last_update_nanos: time::precise_time_ns(),
     frame_delta: 0,
   })
@@ -68,6 +73,9 @@ pub struct LibState<'a> {
   pub curr_g_state: Option<state::GameState<'a>>,
   engine_logger: logger::Logger,
 
+  /// Bank of tiles used when rendering.
+  tile_bank: tile::TileBank,
+
   /// System time of the last update in nanoseconds. Performance counter time,
   /// NOT time since UNIX epoch! Don't use for current human time!
   last_update_nanos: u64,
@@ -81,6 +89,10 @@ impl<'a> LibState<'a> {
     let now = time::precise_time_ns();
     self.frame_delta = now - self.last_update_nanos;
     self.last_update_nanos = now;
+  }
+
+  pub fn register_tile(&mut self, tile: tile::Tile) {
+    self.tile_bank.register_tile(tile);
   }
 
   pub fn update(&mut self) {
@@ -98,7 +110,7 @@ impl<'a> LibState<'a> {
       use glium::Surface;
       let mut target = self.display.draw();
       target.clear_color(0.0, 0.0, 0.0, 1.0);
-      self.renderer.render_game(&self.display, &mut target, self.curr_g_state.as_ref().unwrap());
+      self.renderer.render_game(&self.display, &mut target, self.curr_g_state.as_ref().unwrap(), &self.tile_bank);
       let _ = target.finish();
     }
   }

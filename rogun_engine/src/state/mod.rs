@@ -2,6 +2,7 @@ use entity::component_core::*;
 use entity::component_render::*;
 use entity::component_collision::*;
 use entity::component_control::*;
+use tile::TileMap16;
 
 pub mod comp_list;
 
@@ -14,6 +15,8 @@ pub struct GameState<'a> {
   pub comp_coll_aabb: CompList<CompCollAABB<'a>>,
   pub comp_lr_controller: CompList<CompLRController>,
   pub comp_jump_controller: CompList<CompJumpController>,
+
+  pub tile_maps: Vec<TileMap16>,
 }
 
 impl<'a> GameState<'a> {
@@ -25,6 +28,8 @@ impl<'a> GameState<'a> {
       comp_coll_aabb: CompList::new(),
       comp_lr_controller: CompList::new(),
       comp_jump_controller: CompList::new(),
+
+      tile_maps: Vec::new(),
     }
   }
 }

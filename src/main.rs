@@ -9,7 +9,16 @@ fn setup_g_state(engine: &mut engine::LibState) {
   use engine::entity::*;
   use engine::common::vec::*;
   use engine::common::color::*;
+  use engine::tile::*;
   use glium::glutin::VirtualKeyCode;
+
+  {
+    // Edit tile bank, insert tile with id = 1
+    let mut tile = Tile::new(1);
+    tile.color = RGBf32::new(0.0, 1.0, 0.0);
+    engine.register_tile(tile);
+  }
+
   let g_state = &mut engine.curr_g_state.as_mut().unwrap();
 
   g_state.comp_aabb.add_component(CompAABB {
@@ -38,6 +47,13 @@ fn setup_g_state(engine: &mut engine::LibState) {
     key_r : VirtualKeyCode::D,
     force: 100.0,
   });
+
+  let mut map = TileMap16::new();
+  for ii in 0..map.tiles.len() {
+    if ii % 2 == 0  { continue; }
+    map.tiles[ii] = 1;
+  }
+  g_state.tile_maps.push(map);
 }
 
 fn main() {

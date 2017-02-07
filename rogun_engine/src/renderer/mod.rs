@@ -2,6 +2,7 @@ use glium;
 use glium::uniforms::{UniformsStorage, EmptyUniforms};
 use glium::backend::glutin_backend::GlutinFacade;
 use state::GameState;
+use tile::{TileBank};
 
 #[derive(Copy, Clone)]
 struct Vertex {
@@ -69,9 +70,51 @@ impl<'a> Renderer<'a> {
 
   pub fn render_game(&self, display: &GlutinFacade, 
                      target: &mut glium::Frame, 
-                     g_state: &GameState) {
+                     g_state: &GameState,
+                     tile_bank: &TileBank) {
     use glium::Surface;
     let mut data = Vec::new();
+
+    // Go through tiles, render...
+    for t_map in &g_state.tile_maps {
+      for t_ix in 0..t_map.tiles.len() {
+        let t = t_map.tiles[t_ix];
+        // Get color...
+        let tile_data = tile_bank.get_tile(t);
+        if tile_data.is_none() { continue; }
+        let c = tile_data.unwrap().color;
+        // Get position
+        let x = (t_ix % 16) as f32 * t_map.tile_size 
+          + t_map.world_pos.0;
+        let y = (t_ix / 16) as f32 * t_map.tile_size 
+          + t_map.world_pos.1;
+        // Add data to VBO
+        data.push(Vertex {
+          position: [x, y],
+          color: [c.r, c.g, c.b, 1.0],
+        });
+        data.push(Vertex {
+          position: [x + t_map.tile_size, y],
+          color: [c.r, c.g, c.b, 1.0],
+        });
+        data.push(Vertex {
+          position: [x + t_map.tile_size, y + t_map.tile_size],
+          color: [c.r, c.g, c.b, 1.0],
+        });
+        data.push(Vertex {
+          position: [x, y],
+          color: [c.r, c.g, c.b, 1.0],
+        });
+        data.push(Vertex {
+          position: [x, y + t_map.tile_size],
+          color: [c.r, c.g, c.b, 1.0],
+        });
+        data.push(Vertex {
+          position: [x + t_map.tile_size, y + t_map.tile_size],
+          color: [c.r, c.g, c.b, 1.0],
+        });
+      }
+    }
 
     /// Add debug draws to the VBO
     for c in &g_state.comp_debug_draw {
