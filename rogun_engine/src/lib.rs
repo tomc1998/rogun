@@ -17,6 +17,9 @@ pub mod entity;
 /// State module. Holds current game state
 pub mod state;
 
+/// Input processing system 
+pub mod input;
+
 pub fn init<'a>() -> Option<LibState<'a>> {
   use glium::DisplayBuild;
   let display = glium::glutin::WindowBuilder::new()
@@ -41,6 +44,7 @@ pub fn init<'a>() -> Option<LibState<'a>> {
 
   Some(LibState {
     renderer: renderer::Renderer::new(&display, w, h),
+    input_system: input::InputSystem::new(),
     display: display,
     engine_logger: logger::Logger::new(),
     curr_g_state: Some(state::GameState::new()),
@@ -50,14 +54,19 @@ pub fn init<'a>() -> Option<LibState<'a>> {
 /// State of the library. Holds state of the systems, like the game renderer.
 pub struct LibState<'a> {
   pub renderer : renderer::Renderer<'a>,
+  pub input_system: input::InputSystem,
   pub display: glium::backend::glutin_backend::GlutinFacade,
-  pub curr_g_state: Option<state::GameState>,
+  pub curr_g_state: Option<state::GameState<'a>>,
   engine_logger: logger::Logger,
 }
 
 impl<'a> LibState<'a> {
   pub fn update(&mut self) {
     if self.curr_g_state.is_some() {
+      // Process input
+      self.input_system.process_input(self.curr_g_state.as_mut().unwrap(), &self.display);
+      
+      // Render
       let mut target = self.display.draw();
       self.renderer.render_game(&self.display, &mut target, self.curr_g_state.as_ref().unwrap());
       let _ = target.finish();

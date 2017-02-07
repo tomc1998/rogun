@@ -3,13 +3,18 @@
 /// their dependencies aren't found as components connected to the same entity,
 /// then the engine will panic at runtime.
 use std::ops::*;
-use std::cmp::PartialEq;
 
-/// Module containing components pertaining to rendering the entity on screen
+/// Module containing components pertaining to rendering the entity on screen.
 pub mod component_render;
 
-/// Module contatining 'core' components, like AABB world position
+/// Module contatining 'core' components, like AABB world position.
 pub mod component_core;
+
+/// Module contatining 'collision' components, to specifiy collision boxes for entities.
+pub mod component_collision;
+
+/// Module contatining 'control' components, to specify an entity's behaviour based on user input.
+pub mod component_control;
 
 #[derive(Copy, Clone, PartialOrd, PartialEq, Ord, Eq)]
 pub struct EntityID (pub u16);
