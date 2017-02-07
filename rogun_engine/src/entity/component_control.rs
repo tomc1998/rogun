@@ -9,8 +9,7 @@ pub struct CompLRController {
   pub key_l: VirtualKeyCode,
   pub key_r: VirtualKeyCode,
 
-  pub acceleration: f32,
-  pub max_speed: f32,
+  pub force: f32,
 }
 impl Component for CompLRController {
   fn get_entity_id(&self) -> EntityID { self.entity_id }

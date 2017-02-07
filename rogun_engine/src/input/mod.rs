@@ -1,6 +1,7 @@
 use state::GameState;
 use glium::glutin::{Event, ElementState, VirtualKeyCode};
 use glium::backend::glutin_backend::GlutinFacade;
+use common::vec::Vec2f32;
 
 /// Struct representing a key currently pressed on the keyboard.
 #[derive(Copy, Clone)]
@@ -94,10 +95,7 @@ impl InputSystem {
         let body = body.unwrap();
         // Don't set acceleration, as this won't stack with other
         // acceleration
-        body.vel.0 += c.acceleration;
-        if body.vel.0 > c.max_speed {
-          body.vel.0 = c.max_speed
-        }
+        body.apply_force(Vec2f32(c.force, 0.0));
       }
       else if key_l_down.is_some() && key_r_down.is_none() {
         // Find entity body 
@@ -106,10 +104,7 @@ impl InputSystem {
         let body = body.unwrap();
         // Don't set acceleration, as this won't stack with other
         // acceleration
-        body.vel.0 -= c.acceleration;
-        if body.vel.0 < -c.max_speed {
-          body.vel.0 = -c.max_speed
-        }
+        body.apply_force(Vec2f32(-c.force, 0.0));
       }
     }
   }

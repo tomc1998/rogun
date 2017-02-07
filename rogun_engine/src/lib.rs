@@ -1,5 +1,6 @@
 #[macro_use]
 extern crate glium;
+extern crate time;
 
 /// Logger module.
 #[allow(dead_code)]
@@ -19,6 +20,9 @@ pub mod state;
 
 /// Input processing system 
 pub mod input;
+
+/// Physics system
+pub mod physics;
 
 pub fn init<'a>() -> Option<LibState<'a>> {
   use glium::DisplayBuild;
@@ -45,9 +49,13 @@ pub fn init<'a>() -> Option<LibState<'a>> {
   Some(LibState {
     renderer: renderer::Renderer::new(&display, w, h),
     input_system: input::InputSystem::new(),
+    physics_system: physics::PhysicsSystem::new(),
     display: display,
     engine_logger: logger::Logger::new(),
     curr_g_state: Some(state::GameState::new()),
+
+    last_update_nanos: time::precise_time_ns(),
+    frame_delta: 0,
   })
 }
 
@@ -55,19 +63,41 @@ pub fn init<'a>() -> Option<LibState<'a>> {
 pub struct LibState<'a> {
   pub renderer : renderer::Renderer<'a>,
   pub input_system: input::InputSystem,
+  pub physics_system: physics::PhysicsSystem,
   pub display: glium::backend::glutin_backend::GlutinFacade,
   pub curr_g_state: Option<state::GameState<'a>>,
   engine_logger: logger::Logger,
+
+  /// System time of the last update in nanoseconds. Performance counter time,
+  /// NOT time since UNIX epoch! Don't use for current human time!
+  last_update_nanos: u64,
+  /// Library update delta in nanoseconds
+  frame_delta: u64,
 }
 
 impl<'a> LibState<'a> {
+  /// Update the counter time and delta in LibState.
+  fn update_delta(&mut self) {
+    let now = time::precise_time_ns();
+    self.frame_delta = now - self.last_update_nanos;
+    self.last_update_nanos = now;
+  }
+
   pub fn update(&mut self) {
+    self.update_delta();
+
     if self.curr_g_state.is_some() {
       // Process input
       self.input_system.process_input(self.curr_g_state.as_mut().unwrap(), &self.display);
-      
+
+      // Update physics, remember to convert nano second delta into seconds
+      self.physics_system.update_physics(self.curr_g_state.as_mut().unwrap(), 
+                                         self.frame_delta as f32 / 1000000000.0);
+
       // Render
+      use glium::Surface;
       let mut target = self.display.draw();
+      target.clear_color(0.0, 0.0, 0.0, 1.0);
       self.renderer.render_game(&self.display, &mut target, self.curr_g_state.as_ref().unwrap());
       let _ = target.finish();
     }

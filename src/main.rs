@@ -27,14 +27,16 @@ fn setup_g_state(engine: &mut engine::LibState) {
     entity_id: EntityID(0),
     vel: Vec2f32(0.0, 0.0),
     acc: Vec2f32(0.0, 0.0),
+    force: Vec2f32(0.0, 0.0),
+    mass: 1.0,
+    max_speed: 100.0,
   });
 
   g_state.comp_lr_controller.add_component(CompLRController {
     entity_id: EntityID(0),
     key_l : VirtualKeyCode::A,
     key_r : VirtualKeyCode::D,
-    acceleration: 0.01,
-    max_speed: 15.0,
+    force: 100.0,
   });
 }
 

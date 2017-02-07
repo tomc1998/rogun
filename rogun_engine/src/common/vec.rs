@@ -34,3 +34,29 @@ impl Sub for Vec2f32 {
     Vec2f32(self.0 - other.0, self.1 - other.1)
   }
 }
+
+impl Vec2f32 {
+  pub fn len(&self) -> f32 {
+    (self.0.powi(2) + self.1.powi(2)).sqrt()
+  }
+  pub fn len2(&self) -> f32 {
+    self.0.powi(2) + self.1.powi(2)
+  }
+
+  /// Normalise the vector. Return a mutable reference to self, so you can
+  /// chain functions.
+  pub fn nor(&mut self) -> &mut Vec2f32 {
+    let len = self.len();
+    self.0 /= len;
+    self.1 /= len;
+    return self;
+  }
+
+  /// Scale the vector by a given amount. Return a mutable reference to self,
+  /// so you can chain functioins.
+  pub fn scale(&mut self, amount: f32) -> &mut Vec2f32 {
+    self.0 *= amount;
+    self.1 *= amount;
+    return self;
+  }
+}
